@@ -29,8 +29,8 @@ verification_codes = {}
 # --- EMAIL SYSTEM ---
 def send_verification_email(to_email, code):
     # This securely pulls the email and password from Render's dashboard
-    sender_email = os.getenv("neonrapter@gmail.com")
-    sender_password = os.getenv("ljod dlfg sjam mof")
+    sender_email = os.getenv("SMTP_EMAIL")
+    sender_password = os.getenv("SMTP_PASSWORD")
     
     # Fallback for testing if email isn't set up yet
     if not sender_email or not sender_password:
@@ -65,7 +65,7 @@ class CodeModal(discord.ui.Modal, title="Enter Verification Code"):
         user_id = interaction.user.id
         if user_id in verification_codes and verification_codes[user_id] == self.code.value:
             # Securely fetches the role ID from Render
-            role_id = int(os.getenv("936148506937282560", 0))
+            role_id = int(os.getenv("VERIFIED_ROLE_ID", 0))
             role = interaction.guild.get_role(role_id)
             
             if role:
@@ -182,4 +182,4 @@ threading.Thread(target=run_health_check, daemon=True).start()
 
 # --- START BOT ---
 # Securely fetches the bot token from Render
-bot.run(os.getenv("MTU1MjkyNjE1ODg2NDI1NzA5NA.GMkoAm.IuCyXvaxbMOPfqpSeRfJKO7AwS84AybmRv44hU"))
+bot.run(os.getenv("BOT_TOKEN"))
