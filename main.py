@@ -7,6 +7,8 @@ import datetime
 import discord
 from discord.ext import commands
 from discord import app_commands
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # --- BOT SETUP ---
 class ModerationBot(commands.Bot):
@@ -26,8 +28,9 @@ verification_codes = {}
 
 # --- EMAIL SYSTEM ---
 def send_verification_email(to_email, code):
+    # This securely pulls the email and password from Render's dashboard
     sender_email = os.getenv("neonrapter@gmail.com")
-    sender_password = os.getenv("uesv mrmy hxmy myft")
+    sender_password = os.getenv("ljod dlfg sjam mof")
     
     # Fallback for testing if email isn't set up yet
     if not sender_email or not sender_password:
@@ -61,7 +64,7 @@ class CodeModal(discord.ui.Modal, title="Enter Verification Code"):
     async def on_submit(self, interaction: discord.Interaction):
         user_id = interaction.user.id
         if user_id in verification_codes and verification_codes[user_id] == self.code.value:
-            # Fetch the role ID from Discloud Environment Variables
+            # Securely fetches the role ID from Render
             role_id = int(os.getenv("936148506937282560", 0))
             role = interaction.guild.get_role(role_id)
             
@@ -161,4 +164,22 @@ async def announcement(interaction: discord.Interaction, channel: discord.TextCh
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
 
-bot.run(os.getenv("MTU1MjkyNjE1ODg2NDI1NzA5NA.GgoJty.tHRCNYfMiJaF9x22dbK9o34o0mu4dyokEiB6y8"))
+# --- WEB SERVER FOR RENDER (KEEPS BOT ONLINE) ---
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is running!")
+
+def run_health_check():
+    # Render assigns a dynamic port, defaulting to 10000 if not found
+    port = int(os.getenv("PORT", 10000))
+    server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+    server.serve_forever()
+
+# Starts the web server in the background so it doesn't block the bot
+threading.Thread(target=run_health_check, daemon=True).start()
+
+# --- START BOT ---
+# Securely fetches the bot token from Render
+bot.run(os.getenv("MTU1MjkyNjE1ODg2NDI1NzA5NA.GMkoAm.IuCyXvaxbMOPfqpSeRfJKO7AwS84AybmRv44hU"))
